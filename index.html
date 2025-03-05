@@ -54,7 +54,7 @@
             border-radius: 10px;
             padding: 15px;
             margin: 20px 0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         ul {
@@ -70,7 +70,7 @@
             height: auto;
             border-radius: 8px;
             margin: 15px 0;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
         }
 
         .feedback {
@@ -85,12 +85,58 @@
             body {
                 padding: 10px;
             }
+
             h1 {
                 font-size: 1.5rem;
             }
+
             h2 {
                 font-size: 1.1rem;
             }
+        }
+
+        /* 新增图片放大样式 */
+        .img-zoom-container {
+            position: relative;
+            cursor: zoom-in;
+        }
+
+        .img-zoom-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 999;
+            cursor: zoom-out;
+        }
+
+        .img-zoomed {
+            position: absolute;
+            max-width: 90%;
+            max-height: 90%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            object-fit: contain;
+        }
+
+        /* 链接可访问性优化 */
+        a:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+        .accessible-link {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f8f9fa;
+            word-break: break-all;
         }
     </style>
 </head>
@@ -119,9 +165,11 @@
     <a href="https://github.com/wtalioy/watermark/tree/main" target="_blank">
         https://github.com/wtalioy/watermark
     </a>
-
     <h2>课题海报概览 :</h2>
-    <img src="课题海报.jpg" alt="课题海报封面">
+    <div class="img-zoom-container" onclick="zoomImage(this)">
+        <img src="课题海报.jpg" alt="可逆数据库水印研究课题海报，点击可放大查看"
+             width="" class="zoomable-img">
+    </div>
 </div>
 
 <div class="feedback">
@@ -130,5 +178,30 @@
         点击此处提交反馈
     </a>
 </div>
+<div class="img-zoom-overlay" id="zoomOverlay" onclick="closeZoom()">
+    <img src="课题海报.jpg" alt="放大后的课题海报" class="img-zoomed">
+</div>
+
+<script>
+    // 图片放大功能
+    function zoomImage(container) {
+        const overlay = document.getElementById('zoomOverlay');
+        overlay.style.display = 'block';
+        document.body.style.overflow = 'hidden'; // 禁止背景滚动
+    }
+
+    function closeZoom() {
+        const overlay = document.getElementById('zoomOverlay');
+        overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // ESC键关闭
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeZoom();
+        }
+    });
+</script>
 </body>
 </html>
