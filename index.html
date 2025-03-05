@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>可逆数据库水印研究课题主页</title>
+    <link rel="preload" href="课题海报-1000.webp" as="image" type="image/webp">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -138,6 +140,126 @@
             background: #f8f9fa;
             word-break: break-all;
         }
+
+        /* PDF预览样式 */
+        .pdf-preview {
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            min-height: 500px;
+            background: #f8f8f8;
+        }
+
+        .pdf-controls {
+            padding: 10px;
+            background: #fff;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pdf-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            background: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pdf-btn:hover {
+            background: var(--hover-color);
+        }
+
+        .pdf-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+        }
+
+        .pdf-modal-content {
+            width: 95%;
+            height: 90vh;
+            margin: 2vh auto;
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* 下载链接样式 */
+        .pdf-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 15px;
+            background: #28a745;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .pdf-download:hover {
+            background: #218838;
+        }
+
+        .pdf-viewer-container {
+            position: relative;
+            border: 1px solid #ddd;
+            margin: 20px 0;
+            background: #f8f8f8;
+        }
+
+        .pdf-toolbar {
+            padding: 10px;
+            background: white;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .page-navigation {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .current-page {
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .scale-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--accent-color);
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
@@ -159,7 +281,34 @@
         <li>代码实现组：王瑞明、胡昱、陶凯、王睿豪</li>
     </ul>
 </div>
-
+<!-- 修改后的图片部分 -->
+<div class="img-zoom-container" onclick="zoomImage(this)">
+    <picture>
+        <!-- 优先加载WebP格式 -->
+        <source
+                srcset="
+        课题海报-600.webp 600w,
+        课题海报-1000.webp 1000w,
+        课题海报-1500.webp 1500w
+      "
+                type="image/webp"
+                sizes="(max-width: 600px) 90vw, 800px"
+        >
+        <!-- JPG回退 -->
+        <img
+                src="课题海报-1000.jpg"
+                srcset="
+        课题海报-600.jpg 600w,
+        课题海报-1000.jpg 1000w,
+        课题海报-1500.jpg 1500w
+      "
+                sizes="(max-width: 600px) 90vw, 800px"
+                alt="可逆数据库水印研究课题海报"
+                loading="lazy"
+                class="zoomable-img"
+        >
+    </picture>
+</div>
 <div class="section">
     <h2>项目代码开源地址 :</h2>
     <a href="https://github.com/wtalioy/watermark/tree/main" target="_blank">
@@ -203,5 +352,146 @@
         }
     });
 </script>
+<div class="section">
+    <h2>相关文档下载 :</h2>
+
+    <!-- 结题报告预览 -->
+    <div class="pdf-viewer-container" id="reportViewer">
+        <div class="pdf-toolbar">
+            <div class="page-navigation">
+                <button class="pdf-btn" onclick="changePage('report', -1)">上一页</button>
+                <span class="current-page">第 <span id="reportCurrentPage">1</span> 页</span>
+                <button class="pdf-btn" onclick="changePage('report', 1)">下一页</button>
+            </div>
+            <div class="scale-controls">
+                <button class="pdf-btn" onclick="adjustScale('report', -0.1)">-</button>
+                <span id="reportScale">100%</span>
+                <button class="pdf-btn" onclick="adjustScale('report', 0.1)">+</button>
+            </div>
+        </div>
+        <div class="pdf-canvas-container" id="reportContainer"></div>
+        <div class="loading" id="reportLoading">正在加载PDF文档...</div>
+    </div>
+    <div class="pdf-controls">
+        <a href="结题报告.pdf" class="pdf-download" download>
+            下载完整报告
+        </a>
+    </div>
+
+    <!-- 算法文档预览 -->
+    <div class="pdf-viewer-container" id="algorithmViewer" style="margin-top: 30px;">
+        <div class="pdf-toolbar">
+            <div class="page-navigation">
+                <button class="pdf-btn" onclick="changePage('algorithm', -1)">上一页</button>
+                <span class="current-page">第 <span id="algorithmCurrentPage">1</span> 页</span>
+                <button class="pdf-btn" onclick="changePage('algorithm', 1)">下一页</button>
+            </div>
+            <div class="scale-controls">
+                <button class="pdf-btn" onclick="adjustScale('algorithm', -0.1)">-</button>
+                <span id="algorithmScale">100%</span>
+                <button class="pdf-btn" onclick="adjustScale('algorithm', 0.1)">+</button>
+            </div>
+        </div>
+    </div>
+    <div class="pdf-canvas-container" id="algorithmContainer"></div>
+    <div class="loading" id="algorithmLoading">正在加载PDF文档...</div>
+</div>
+<div class="pdf-controls">
+    <a href="部分优化算法.pdf" class="pdf-download" download>
+        下载完整成果
+    </a>
+</div>
+</div>
+
+<script>
+    // PDF查看器状态管理
+    const pdfState = {
+        report: {
+            pdfDoc: null,
+            currentPage: 1,
+            scale: 1,
+            container: document.getElementById('reportContainer'),
+            loading: document.getElementById('reportLoading')
+        },
+        algorithm: {
+            pdfDoc: null,
+            currentPage: 1,
+            scale: 1,
+            container: document.getElementById('algorithmContainer'),
+            loading: document.getElementById('algorithmLoading')
+        }
+    };
+
+    // 初始化PDF查看器
+    async function initPdfViewer(pdfName, pdfUrl) {
+        const state = pdfState[pdfName];
+        try {
+            const loadingTask = pdfjsLib.getDocument(pdfUrl);
+            state.pdfDoc = await loadingTask.promise;
+            state.loading.style.display = 'none';
+            await renderPage(pdfName);
+        } catch (err) {
+            state.loading.textContent = 'PDF加载失败: ' + err.message;
+        }
+    }
+
+    // 渲染页面
+    async function renderPage(pdfName) {
+        const state = pdfState[pdfName];
+        const page = await state.pdfDoc.getPage(state.currentPage);
+        const viewport = page.getViewport({scale: state.scale});
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        state.container.innerHTML = '';
+        state.container.appendChild(canvas);
+
+        await page.render({
+            canvasContext: context,
+            viewport: viewport
+        }).promise;
+
+        // 更新页面信息
+        document.getElementById(`${pdfName}CurrentPage`).textContent = state.currentPage;
+        document.getElementById(`${pdfName}Scale`).textContent =
+            `${Math.round(state.scale * 100)}%`;
+    }
+
+    // 翻页功能
+    function changePage(pdfName, delta) {
+        const state = pdfState[pdfName];
+        const newPage = state.currentPage + delta;
+        if (newPage > 0 && newPage <= state.pdfDoc.numPages) {
+            state.currentPage = newPage;
+            renderPage(pdfName);
+        }
+    }
+
+    // 调整缩放
+    function adjustScale(pdfName, delta) {
+        const state = pdfState[pdfName];
+        state.scale = Math.max(0.5, Math.min(2, state.scale + delta));
+        renderPage(pdfName);
+    }
+
+    // 初始化所有PDF查看器
+    window.onload = () => {
+        initPdfViewer('report', '结题报告.pdf');
+        initPdfViewer('algorithm', '部分优化算法.pdf');
+    };
+</script>
+<!-- PDF预览模态框 -->
+<div id="pdfModal" class="pdf-modal">
+    <div class="pdf-modal-content">
+        <iframe id="pdfFrame" class="pdf-viewer"></iframe>
+        <button class="pdf-btn" style="position: absolute; top: 10px; right: 10px;"
+                onclick="closePdfModal()">关闭
+        </button>
+    </div>
+</div>
+
 </body>
 </html>
